@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Drone Swarm Coordinator — {{ scenario_label }}</title>
+<style>
+  :root {
+    --bg: #eef1f5; --surface: #ffffff; --surface-alt: #f4f6f9;
+    --ink: #101828; --muted: #5d6b82; --border: #dde3ea; --accent: #1b4965;
+    --idle: #94a3b8; --en-route: #3b82f6; --on-station: #16a34a; --grounded: #dc2626;
+    --font-mono: ui-monospace, "Cascadia Code", "SF Mono", Consolas, "Roboto Mono", monospace;
+    --font-sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0b0f14; --surface:#131a22; --surface-alt:#0f151c; --ink:#e6ebf0; --muted:#93a1b4; --border:#263241; --accent:#6fb3d9; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 2rem 1.25rem 4rem; background: var(--bg); color: var(--ink); font-family: var(--font-sans); display: flex; justify-content: center; }
+  main { max-width: 960px; width: 100%; }
+
+  .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 700; margin: 0 0 0.5rem 0; }
+  h1 { margin: 0 0 0.3rem 0; font-size: 1.4rem; font-weight: 700; }
+  .subtitle { color: var(--muted); margin: 0 0 1.5rem 0; font-size: 0.9rem; }
+  .back-link { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+
+  .summary { display: flex; gap: 1.5rem; margin: 0.5rem 0 1.5rem 0; font-size: 0.88rem; color: var(--muted); }
+  .summary strong { color: var(--ink); }
+
+  section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; margin-bottom: 1.5rem; }
+  h2 { margin: 0 0 0.9rem 0; font-size: 1rem; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 0.5rem 0.6rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  td.mono { font-family: var(--font-mono); white-space: nowrap; }
+
+  .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 999px; font-size: 0.72rem; font-weight: 700; color: #fff; }
+  .badge.idle { background: var(--idle); }
+  .badge.en_route { background: var(--en-route); }
+  .badge.on_station { background: var(--on-station); }
+  .badge.grounded { background: var(--grounded); }
+
+  .empty { color: var(--muted); font-size: 0.88rem; }
+  p.hint { color: var(--muted); font-size: 0.82rem; margin: -0.3rem 0 0.9rem 0; line-height: 1.45; }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Drone Swarm Coordinator</p>
+  <h1>{{ scenario_label }}</h1>
+  <p class="subtitle"><a class="back-link" href="/">&larr; Volver</a></p>
+
+  <div class="summary">
+    <span><strong>{{ drones|length }}</strong> drones</span>
+    <span><strong>{{ n_ticks }}</strong> ticks simulados</span>
+    <span><strong>{{ conflict_count }}</strong> conflictos de separacion</span>
+  </div>
+
+  <section>
+    <h2>Mapa animado</h2>
+    {{ map_html | safe }}
+  </section>
+
+  <section>
+    <h2>Estado final de la flota</h2>
+    <table>
+      <thead>
+        <tr><th>Dron</th><th>Estado</th><th>Bateria</th><th>Posicion</th><th>Tarea</th></tr>
+      </thead>
+      <tbody>
+        {% for drone in drones %}
+        <tr>
+          <td class="mono">{{ drone.id }}</td>
+          <td><span class="badge {{ drone.status.value }}">{{ drone.status.value }}</span></td>
+          <td>{{ "%.1f"|format(drone.battery_pct) }}%</td>
+          <td class="mono">{{ "%.5f"|format(drone.position.lat) }}, {{ "%.5f"|format(drone.position.lon) }}</td>
+          <td>{{ drone.assigned_task_id or "—" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Conflictos de separacion</h2>
+    {% if conflicts %}
+    <p class="hint">Agrupados por pareja de drones: dos drones con rutas cercanas pueden quedar por debajo del minimo de seguridad durante varios ticks seguidos.</p>
+    <table>
+      <thead>
+        <tr><th>Drones</th><th>Desde (tick)</th><th>Hasta (tick)</th><th>Ocurrencias</th><th>Distancia minima</th><th>Minimo</th></tr>
+      </thead>
+      <tbody>
+        {% for group in conflicts %}
+        <tr>
+          <td class="mono">{{ group.drone_a_id }} &harr; {{ group.drone_b_id }}</td>
+          <td>{{ group.first_tick }}</td>
+          <td>{{ group.last_tick }}</td>
+          <td>{{ group.occurrences }}</td>
+          <td>{{ "%.1f"|format(group.min_distance_m) }} m</td>
+          <td>{{ "%.0f"|format(group.min_separation_m) }} m</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="empty">No se detecto ningun conflicto de separacion durante la simulacion.</p>
+    {% endif %}
+  </section>
+</main>
+</body>
+</html>

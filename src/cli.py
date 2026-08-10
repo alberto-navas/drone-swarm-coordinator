@@ -46,7 +46,9 @@ def _print_report(final: SimulationState, mission_id: str) -> None:
     print(f"Mision: {mission_id}  ({len(final.drones)} drones, tick {final.tick})")
     print(f"Conflictos de separacion detectados en toda la simulacion: {len(final.conflicts)}")
     print()
-    for drone in sorted(final.drones, key=lambda d: d.id):
+    # (len(id), id) en vez de solo id: orden natural para "drone-2" antes que
+    # "drone-10" (compararlos como texto los pondria al reves).
+    for drone in sorted(final.drones, key=lambda d: (len(d.id), d.id)):
         print(
             f"  {drone.id:10s} estado={drone.status.value:11s} "
             f"bateria={drone.battery_pct:5.1f}%  "
