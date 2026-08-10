@@ -39,7 +39,12 @@ def bearing_deg(a: GeoPoint, b: GeoPoint) -> float:
     d_lambda = math.radians(b.lon - a.lon)
     x = math.sin(d_lambda) * math.cos(phi2)
     y = math.cos(phi1) * math.sin(phi2) - math.sin(phi1) * math.cos(phi2) * math.cos(d_lambda)
-    return math.degrees(math.atan2(x, y)) % 360.0
+    # Doble modulo: un rumbo que matematicamente es 0 puede llegar aqui
+    # como un valor negativo minusculo por redondeo de coma flotante
+    # (p.ej. -1e-15), y "% 360.0" de eso da 360.0 en vez de 0.0 (el propio
+    # 360.0 no es multiplo exacto representable de ese resto). Repetir el
+    # modulo normaliza ese caso limite a 0.0.
+    return (math.degrees(math.atan2(x, y)) % 360.0) % 360.0
 
 
 def centroid(points: list[GeoPoint]) -> GeoPoint:

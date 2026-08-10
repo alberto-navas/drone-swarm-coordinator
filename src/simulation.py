@@ -63,14 +63,20 @@ def step(
 ) -> SimulationState:
     """Avanza la simulacion un tick y devuelve el nuevo estado (no muta `state`)."""
     next_tick = state.tick + 1
-    slot_targets = formation_targets(state.drones, mission.formation) if mission.formation else {}
+    # Los conflictos se detectan sobre la posicion con la que se ENTRA a
+    # este tick, antes de aplicar la correccion: si se detectaran sobre la
+    # posicion ya corregida, una correccion lo bastante fuerte podria
+    # separar a los drones en el mismo paso en que invadieron el radio de
+    # seguridad, y el conflicto jamas quedaria registrado pese a haber
+    # ocurrido de verdad.
+    conflicts = detect_conflicts(state.drones, min_separation_m, next_tick)
 
+    slot_targets = formation_targets(state.drones, mission.formation) if mission.formation else {}
     new_drones = [
         _advance_drone(drone, slot_targets.get(drone.id, drone.target), state.drones, min_separation_m)
         for drone in state.drones
     ]
 
-    conflicts = detect_conflicts(new_drones, min_separation_m, next_tick)
     return SimulationState(tick=next_tick, drones=new_drones, conflicts=state.conflicts + conflicts)
 
 
@@ -90,6 +96,8 @@ def _advance_drone(drone: Drone, target: GeoPoint | None, all_drones: list[Drone
 
     if target is None:
         drone.battery_pct = max(0.0, drone.battery_pct - BATTERY_DRAIN_PCT_PER_S_IDLE * TICK_SECONDS)
+        if drone.battery_pct <= 0.0:
+            drone.status = DroneStatus.GROUNDED
         return drone
 
     step_m = drone.speed_mps * TICK_SECONDS
@@ -111,7 +119,8 @@ def _advance_drone(drone: Drone, target: GeoPoint | None, all_drones: list[Drone
         north = move_m * math.cos(bearing_rad) + north_avoid * step_m
         east = move_m * math.sin(bearing_rad) + east_avoid * step_m
         drone.position = offset_point(drone.position, north, east)
-        drone.heading_deg = math.degrees(math.atan2(east, north)) % 360.0
+        # Doble modulo: ver el comentario equivalente en src/geo.bearing_deg.
+        drone.heading_deg = (math.degrees(math.atan2(east, north)) % 360.0) % 360.0
         drone.status = DroneStatus.EN_ROUTE
 
     drain = BATTERY_DRAIN_PCT_PER_S_MOVING if drone.status == DroneStatus.EN_ROUTE else BATTERY_DRAIN_PCT_PER_S_IDLE

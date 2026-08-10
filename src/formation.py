@@ -47,7 +47,8 @@ def _mean_heading_deg(headings: list[float]) -> float:
     """Media circular (no aritmetica: 350 y 10 grados deben promediar a 0, no a 180)."""
     sin_sum = sum(math.sin(math.radians(h)) for h in headings)
     cos_sum = sum(math.cos(math.radians(h)) for h in headings)
-    return math.degrees(math.atan2(sin_sum, cos_sum)) % 360.0
+    # Doble modulo: ver el comentario equivalente en src/geo.bearing_deg.
+    return (math.degrees(math.atan2(sin_sum, cos_sum)) % 360.0) % 360.0
 
 
 def _compute_slots(n: int, config: FormationConfig, origin: GeoPoint, heading_deg: float) -> dict[str, GeoPoint]:
