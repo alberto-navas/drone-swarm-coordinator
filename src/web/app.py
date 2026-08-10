@@ -17,6 +17,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
+from src.i18n import UI_LABELS, normalize_lang, scenario_label, status_label
 from src.model import ConflictEvent
 from src.scenarios import SCENARIOS
 from src.simulation import DEFAULT_MIN_SEPARATION_M
@@ -26,10 +27,6 @@ from .animated_map import build_animated_map
 
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
 
-_SCENARIO_LABELS = {
-    "cobertura": "Cobertura de area con conflicto forzado",
-    "formacion": "Transito en formacion (sin conflicto forzado)",
-}
 _DEFAULT_TICKS = {"cobertura": 60, "formacion": 30}
 _MIN_TICKS, _MAX_TICKS = 5, 600
 
@@ -69,16 +66,19 @@ def _summarize_conflicts(events: list[ConflictEvent]) -> list[dict[str, Any]]:
 
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request) -> HTMLResponse:
+async def index(request: Request, lang: str = "es") -> HTMLResponse:
+    lang = normalize_lang(lang)
     scenarios = [
-        {"id": scenario_id, "label": _SCENARIO_LABELS[scenario_id], "default_ticks": _DEFAULT_TICKS[scenario_id]}
+        {"id": scenario_id, "label": scenario_label(scenario_id, lang), "default_ticks": _DEFAULT_TICKS[scenario_id]}
         for scenario_id in SCENARIOS
     ]
-    return _templates.TemplateResponse(request, "index.html", {"scenarios": scenarios})
+    context = {"lang": lang, "labels": UI_LABELS[lang], "scenarios": scenarios}
+    return _templates.TemplateResponse(request, "index.html", context)
 
 
 @app.get("/run", response_class=HTMLResponse)
-async def run_scenario(request: Request, scenario: str, ticks: int | None = None) -> HTMLResponse:
+async def run_scenario(request: Request, scenario: str, ticks: int | None = None, lang: str = "es") -> HTMLResponse:
+    lang = normalize_lang(lang)
     if scenario not in SCENARIOS:
         raise HTTPException(status_code=404, detail=f"Escenario desconocido: {scenario}")
     n_ticks = _DEFAULT_TICKS[scenario] if ticks is None else max(_MIN_TICKS, min(_MAX_TICKS, ticks))
@@ -88,11 +88,15 @@ async def run_scenario(request: Request, scenario: str, ticks: int | None = None
     final = history[-1]
 
     context: dict[str, Any] = {
-        "scenario_label": _SCENARIO_LABELS[scenario],
+        "lang": lang,
+        "labels": UI_LABELS[lang],
+        "scenario_id": scenario,
+        "scenario_label": scenario_label(scenario, lang),
         "n_ticks": n_ticks,
         "map_html": build_animated_map(history),
         # (len(id), id): orden natural para "drone-2" antes que "drone-10".
         "drones": sorted(final.drones, key=lambda d: (len(d.id), d.id)),
+        "status_label": lambda status: status_label(status, lang),
         "conflicts": _summarize_conflicts(final.conflicts),
         "conflict_count": len(final.conflicts),
     }

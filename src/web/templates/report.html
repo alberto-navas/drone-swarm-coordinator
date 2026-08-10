@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <title>Drone Swarm Coordinator — {{ scenario_label }}</title>
@@ -18,10 +18,16 @@
   body { margin: 0; padding: 2rem 1.25rem 4rem; background: var(--bg); color: var(--ink); font-family: var(--font-sans); display: flex; justify-content: center; }
   main { max-width: 960px; width: 100%; }
 
+  .top-bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
   .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 700; margin: 0 0 0.5rem 0; }
   h1 { margin: 0 0 0.3rem 0; font-size: 1.4rem; font-weight: 700; }
   .subtitle { color: var(--muted); margin: 0 0 1.5rem 0; font-size: 0.9rem; }
   .back-link { color: var(--accent); text-decoration: none; font-size: 0.85rem; }
+
+  .lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+  .lang-switch a { background: var(--surface); color: var(--muted); padding: 0.35rem 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
+  .lang-switch a + a { border-left: 1px solid var(--border); }
+  .lang-switch a[aria-current="true"] { background: var(--accent); color: var(--surface); }
 
   .summary { display: flex; gap: 1.5rem; margin: 0.5rem 0 1.5rem 0; font-size: 0.88rem; color: var(--muted); }
   .summary strong { color: var(--ink); }
@@ -46,32 +52,39 @@
 </head>
 <body>
 <main>
-  <p class="eyebrow">Drone Swarm Coordinator</p>
+  <div class="top-bar">
+    <p class="eyebrow">Drone Swarm Coordinator</p>
+    <div class="lang-switch" role="group" aria-label="Idioma / Language / Sprache">
+      <a href="/run?scenario={{ scenario_id }}&ticks={{ n_ticks }}&lang=es" aria-current="{{ 'true' if lang == 'es' else 'false' }}">ES</a>
+      <a href="/run?scenario={{ scenario_id }}&ticks={{ n_ticks }}&lang=en" aria-current="{{ 'true' if lang == 'en' else 'false' }}">EN</a>
+      <a href="/run?scenario={{ scenario_id }}&ticks={{ n_ticks }}&lang=de" aria-current="{{ 'true' if lang == 'de' else 'false' }}">DE</a>
+    </div>
+  </div>
   <h1>{{ scenario_label }}</h1>
-  <p class="subtitle"><a class="back-link" href="/">&larr; Volver</a></p>
+  <p class="subtitle"><a class="back-link" href="/?lang={{ lang }}">{{ labels.back_link }}</a></p>
 
   <div class="summary">
-    <span><strong>{{ drones|length }}</strong> drones</span>
-    <span><strong>{{ n_ticks }}</strong> ticks simulados</span>
-    <span><strong>{{ conflict_count }}</strong> conflictos de separacion</span>
+    <span><strong>{{ drones|length }}</strong> {{ labels.summary_drones }}</span>
+    <span><strong>{{ n_ticks }}</strong> {{ labels.summary_ticks }}</span>
+    <span><strong>{{ conflict_count }}</strong> {{ labels.summary_conflicts }}</span>
   </div>
 
   <section>
-    <h2>Mapa animado</h2>
+    <h2>{{ labels.map_heading }}</h2>
     {{ map_html | safe }}
   </section>
 
   <section>
-    <h2>Estado final de la flota</h2>
+    <h2>{{ labels.fleet_heading }}</h2>
     <table>
       <thead>
-        <tr><th>Dron</th><th>Estado</th><th>Bateria</th><th>Posicion</th><th>Tarea</th></tr>
+        <tr><th>{{ labels.th_drone }}</th><th>{{ labels.th_status }}</th><th>{{ labels.th_battery }}</th><th>{{ labels.th_position }}</th><th>{{ labels.th_task }}</th></tr>
       </thead>
       <tbody>
         {% for drone in drones %}
         <tr>
           <td class="mono">{{ drone.id }}</td>
-          <td><span class="badge {{ drone.status.value }}">{{ drone.status.value }}</span></td>
+          <td><span class="badge {{ drone.status.value }}">{{ status_label(drone.status.value) }}</span></td>
           <td>{{ "%.1f"|format(drone.battery_pct) }}%</td>
           <td class="mono">{{ "%.5f"|format(drone.position.lat) }}, {{ "%.5f"|format(drone.position.lon) }}</td>
           <td>{{ drone.assigned_task_id or "—" }}</td>
@@ -82,12 +95,12 @@
   </section>
 
   <section>
-    <h2>Conflictos de separacion</h2>
+    <h2>{{ labels.conflicts_heading }}</h2>
     {% if conflicts %}
-    <p class="hint">Agrupados por pareja de drones: dos drones con rutas cercanas pueden quedar por debajo del minimo de seguridad durante varios ticks seguidos.</p>
+    <p class="hint">{{ labels.conflicts_hint }}</p>
     <table>
       <thead>
-        <tr><th>Drones</th><th>Desde (tick)</th><th>Hasta (tick)</th><th>Ocurrencias</th><th>Distancia minima</th><th>Minimo</th></tr>
+        <tr><th>{{ labels.th_pair }}</th><th>{{ labels.th_since }}</th><th>{{ labels.th_until }}</th><th>{{ labels.th_occurrences }}</th><th>{{ labels.th_min_distance }}</th><th>{{ labels.th_min_separation }}</th></tr>
       </thead>
       <tbody>
         {% for group in conflicts %}
@@ -103,7 +116,7 @@
       </tbody>
     </table>
     {% else %}
-    <p class="empty">No se detecto ningun conflicto de separacion durante la simulacion.</p>
+    <p class="empty">{{ labels.conflicts_empty }}</p>
     {% endif %}
   </section>
 </main>

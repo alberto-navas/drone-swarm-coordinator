@@ -88,6 +88,43 @@ def test_run_shows_no_conflicts_message_when_there_are_none() -> None:
     assert "No se detecto ningun conflicto" in response.text
 
 
+def test_index_defaults_to_spanish() -> None:
+    response = client.get("/")
+    assert 'lang="es"' in response.text
+    assert "Coordinacion de un enjambre" in response.text
+
+
+def test_index_lang_query_param_switches_language() -> None:
+    en = client.get("/?lang=en")
+    de = client.get("/?lang=de")
+    assert 'lang="en"' in en.text and "Coordinating a swarm" in en.text
+    assert 'lang="de"' in de.text and "Koordination eines eigenen" in de.text
+
+
+def test_index_unsupported_lang_falls_back_to_spanish() -> None:
+    response = client.get("/?lang=fr")
+    assert 'lang="es"' in response.text
+
+
+def test_run_translates_report_when_lang_given() -> None:
+    response = client.get("/run", params={"scenario": "formacion", "ticks": 10, "lang": "en"})
+    assert response.status_code == 200
+    assert 'lang="en"' in response.text
+    assert "Final fleet status" in response.text
+    assert "Area coverage" not in response.text  # es el escenario "formacion", no "cobertura"
+
+
+def test_run_translates_status_badges() -> None:
+    response = client.get("/run", params={"scenario": "formacion", "ticks": 1, "lang": "de"})
+    assert response.status_code == 200
+    assert "unterwegs" in response.text or "in Position" in response.text
+
+
+def test_run_lang_switch_preserves_scenario_and_ticks() -> None:
+    response = client.get("/run", params={"scenario": "cobertura", "ticks": 15, "lang": "es"})
+    assert "/run?scenario=cobertura&ticks=15&lang=en" in response.text
+
+
 def test_main_module_is_importable() -> None:
     """src/web/__main__.py solo se ejecuta con `python -m src.web`; esto solo comprueba que sus imports no fallan."""
     import src.web.__main__  # noqa: F401

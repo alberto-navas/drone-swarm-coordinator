@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ lang }}">
 <head>
 <meta charset="UTF-8">
 <title>Drone Swarm Coordinator</title>
@@ -17,13 +17,18 @@
   body { margin: 0; padding: 3rem 1.25rem; background: var(--bg); color: var(--ink); font-family: var(--font-sans); display: flex; justify-content: center; }
   main { max-width: 640px; width: 100%; }
 
+  .top-bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
   .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 700; margin: 0 0 0.5rem 0; }
   h1 { margin: 0 0 0.4rem 0; font-size: 1.55rem; font-weight: 700; letter-spacing: -0.01em; }
   .subtitle { color: var(--muted); margin: 0 0 1.75rem 0; font-size: 0.95rem; line-height: 1.5; }
 
+  .lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
+  .lang-switch a { background: var(--surface); color: var(--muted); padding: 0.35rem 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
+  .lang-switch a + a { border-left: 1px solid var(--border); }
+  .lang-switch a[aria-current="true"] { background: var(--accent); color: var(--surface); }
+
   section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; }
   h2 { margin: 0 0 0.6rem 0; font-size: 1.05rem; }
-  p.hint { color: var(--muted); font-size: 0.85rem; margin: 0.3rem 0 1.1rem 0; line-height: 1.45; }
 
   label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.35rem; }
   input[type="number"] { width: 8rem; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-alt); color: var(--ink); margin-bottom: 0.9rem; font-family: var(--font-sans); font-size: 0.9rem; }
@@ -36,23 +41,31 @@
 </head>
 <body>
 <main>
-  <p class="eyebrow">Drone Swarm Coordinator</p>
-  <h1>Coordinacion de un enjambre de drones propios</h1>
-  <p class="subtitle">Reparto de mision, formacion y evitacion de colisiones para una flota propia — elige un escenario de demostracion para verlo simulado sobre un mapa real.</p>
+  <div class="top-bar">
+    <p class="eyebrow">Drone Swarm Coordinator</p>
+    <div class="lang-switch" role="group" aria-label="Idioma / Language / Sprache">
+      <a href="/?lang=es" aria-current="{{ 'true' if lang == 'es' else 'false' }}">ES</a>
+      <a href="/?lang=en" aria-current="{{ 'true' if lang == 'en' else 'false' }}">EN</a>
+      <a href="/?lang=de" aria-current="{{ 'true' if lang == 'de' else 'false' }}">DE</a>
+    </div>
+  </div>
+  <h1>{{ labels.index_h1 }}</h1>
+  <p class="subtitle">{{ labels.index_subtitle }}</p>
 
   {% for scenario in scenarios %}
   <section>
     <h2>{{ scenario.label }}</h2>
     <form action="/run" method="get">
       <input type="hidden" name="scenario" value="{{ scenario.id }}">
-      <label for="ticks-{{ scenario.id }}">Duracion de la simulacion (ticks; 1 tick = 1 segundo de mision)</label>
+      <input type="hidden" name="lang" value="{{ lang }}">
+      <label for="ticks-{{ scenario.id }}">{{ labels.ticks_label }}</label>
       <input type="number" id="ticks-{{ scenario.id }}" name="ticks" value="{{ scenario.default_ticks }}" min="5" max="600">
-      <div><button type="submit">Ejecutar</button></div>
+      <div><button type="submit">{{ labels.run_button }}</button></div>
     </form>
   </section>
   {% endfor %}
 
-  <p class="limits">Esto es una herramienta de simulacion, planificacion y visualizacion: no controla drones reales ni se conecta a ningun hardware de vuelo.</p>
+  <p class="limits">{{ labels.limits_text }}</p>
 </main>
 </body>
 </html>
