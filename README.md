@@ -66,11 +66,17 @@ Cuatro módulos independientes y auditables por separado, `src/`:
   una cinemática mínima (velocidad de crucero constante hacia el punto
   objetivo) y un drenaje simple de batería.
 
-**Panel web** (`src/web/`, opcional): elige uno de los dos escenarios de
-demostración y ve un mapa animado (Leaflet real, con calles y costas
+**Panel web** (`src/web/`, opcional): define tu propia misión — número de
+drones, punto de despegue, y una tarea (cubrir área / vigilar puntos /
+llegar a destinos) o una formación — o elige uno de los dos escenarios de
+demostración, y ve un mapa animado (Leaflet real, con calles y costas
 reales) con la trayectoria de cada dron y los conflictos de separación
 marcados en su instante exacto, junto a la tabla de estado final de la
-flota y la tabla de conflictos agrupados por pareja de drones. Capa fina
+flota y la tabla de conflictos agrupados por pareja de drones. Una misión
+personalizada usa tarea O formación, nunca ambas a la vez — combinarlas
+dejaría la tarea sin ningún efecto (la formación recalcula el objetivo de
+cada dron en cada tick), así que el formulario obliga a elegir un único
+modo en vez de ofrecer una combinación silenciosamente rota. Capa fina
 sobre el mismo `src/simulation.py` que usa el CLI: no reimplementa nada
 del motor.
 
@@ -138,12 +144,16 @@ python -m src.web
 # -> http://127.0.0.1:8000
 ```
 
-Elige un escenario y una duración (en ticks) y pulsa "Ejecutar" para ver
-el mapa animado, el estado final de la flota y los conflictos de
+En "Construye tu propia misión", define el número de drones, el punto de
+despegue, y el tipo de misión (área a cubrir, puntos a vigilar, destinos,
+o formación) con sus parámetros; o, más abajo, elige uno de los dos
+escenarios de demostración y una duración en ticks. Pulsa "Ejecutar" para
+ver el mapa animado, el estado final de la flota y los conflictos de
 separación detectados. El selector ES/EN/DE arriba a la derecha cambia el
 idioma de toda la página — la URL (`?lang=en`) es autocontenida, sin
 cookies ni estado de sesión, y al cambiar de idioma en un informe se
-vuelve a ejecutar el mismo escenario con la misma duración.
+vuelve a ejecutar la misma misión o el mismo escenario con los mismos
+parámetros.
 
 ## Escenarios de demostración
 
@@ -174,7 +184,7 @@ flota:
 pytest -v
 ```
 
-79 tests cubriendo los nueve módulos del motor y del panel web (modelo,
+93 tests cubriendo los nueve módulos del motor y del panel web (modelo,
 geometría, asignación, formación, conflictos, simulación, escenarios,
 i18n, CLI, mapa animado, panel web), 99% de cobertura (`pytest --cov=src`,
 con un umbral de CI del 85% como red de seguridad, no como objetivo línea

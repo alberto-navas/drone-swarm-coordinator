@@ -59,7 +59,8 @@ UI_LABELS: dict[str, dict[str, str]] = {
         "index_h1": "Coordinacion de un enjambre de drones propios",
         "index_subtitle": (
             "Reparto de mision, formacion y evitacion de colisiones para una flota propia "
-            "— elige un escenario de demostracion para verlo simulado sobre un mapa real."
+            "— define tu propia mision o elige un escenario de demostracion, y velo simulado "
+            "sobre un mapa real."
         ),
         "ticks_label": "Duracion de la simulacion (ticks; 1 tick = 1 segundo de mision)",
         "run_button": "Ejecutar",
@@ -90,12 +91,36 @@ UI_LABELS: dict[str, dict[str, str]] = {
         "th_occurrences": "Ocurrencias",
         "th_min_distance": "Distancia minima",
         "th_min_separation": "Minimo",
+        "custom_mission_heading": "Construye tu propia mision",
+        "custom_mission_hint": (
+            "En vez de una demo ya cerrada, define tu propia flota y mision: cuantos drones, "
+            "desde donde despegan, y que tienen que hacer."
+        ),
+        "custom_mission_label": "Mision personalizada",
+        "field_drones": "Numero de drones",
+        "field_launch": "Punto de despegue (latitud, longitud)",
+        "field_mode": "Tipo de mision",
+        "mode_area": "Cubrir un area",
+        "mode_point": "Vigilar puntos",
+        "mode_destination": "Llegar a destinos",
+        "mode_formation": "Formacion (sin tarea)",
+        "field_points": "Puntos (uno por linea: latitud,longitud)",
+        "field_area_sw": "Esquina suroeste (latitud, longitud)",
+        "field_area_ne": "Esquina noreste (latitud, longitud)",
+        "field_formation_shape": "Forma",
+        "formation_line": "Linea",
+        "formation_v": "V",
+        "formation_grid": "Rejilla",
+        "field_spacing": "Separacion entre drones (m)",
+        "field_leader": "Lider (opcional, p.ej. drone-1; vacio = centroide del grupo)",
+        "field_min_separation": "Separacion minima de seguridad (m)",
     },
     "en": {
         "index_h1": "Coordinating a swarm of your own drones",
         "index_subtitle": (
             "Mission allocation, formation flying and collision avoidance for your own fleet "
-            "— pick a demo scenario to see it simulated on a real map."
+            "— define your own mission or pick a demo scenario, and see it simulated on a "
+            "real map."
         ),
         "ticks_label": "Simulation duration (ticks; 1 tick = 1 second of mission time)",
         "run_button": "Run",
@@ -126,12 +151,36 @@ UI_LABELS: dict[str, dict[str, str]] = {
         "th_occurrences": "Occurrences",
         "th_min_distance": "Minimum distance",
         "th_min_separation": "Minimum",
+        "custom_mission_heading": "Build your own mission",
+        "custom_mission_hint": (
+            "Instead of a canned demo, define your own fleet and mission: how many drones, "
+            "where they launch from, and what they have to do."
+        ),
+        "custom_mission_label": "Custom mission",
+        "field_drones": "Number of drones",
+        "field_launch": "Launch point (latitude, longitude)",
+        "field_mode": "Mission type",
+        "mode_area": "Cover an area",
+        "mode_point": "Watch points",
+        "mode_destination": "Reach destinations",
+        "mode_formation": "Formation (no task)",
+        "field_points": "Points (one per line: latitude,longitude)",
+        "field_area_sw": "Southwest corner (latitude, longitude)",
+        "field_area_ne": "Northeast corner (latitude, longitude)",
+        "field_formation_shape": "Shape",
+        "formation_line": "Line",
+        "formation_v": "V",
+        "formation_grid": "Grid",
+        "field_spacing": "Spacing between drones (m)",
+        "field_leader": "Leader (optional, e.g. drone-1; empty = group centroid)",
+        "field_min_separation": "Minimum safety separation (m)",
     },
     "de": {
         "index_h1": "Koordination eines eigenen Drohnenschwarms",
         "index_subtitle": (
             "Missionsverteilung, Formationsflug und Kollisionsvermeidung fuer eine eigene "
-            "Flotte — wahle ein Demo-Szenario, um es auf einer echten Karte simuliert zu sehen."
+            "Flotte — definiere deine eigene Mission oder waehle ein Demo-Szenario, und sieh "
+            "es auf einer echten Karte simuliert."
         ),
         "ticks_label": "Simulationsdauer (Ticks; 1 Tick = 1 Sekunde Missionszeit)",
         "run_button": "Starten",
@@ -162,6 +211,29 @@ UI_LABELS: dict[str, dict[str, str]] = {
         "th_occurrences": "Vorkommen",
         "th_min_distance": "Minimaler Abstand",
         "th_min_separation": "Minimum",
+        "custom_mission_heading": "Baue deine eigene Mission",
+        "custom_mission_hint": (
+            "Statt einer fertigen Demo definierst du deine eigene Flotte und Mission: wie viele "
+            "Drohnen, von wo sie starten und was sie tun sollen."
+        ),
+        "custom_mission_label": "Eigene Mission",
+        "field_drones": "Anzahl Drohnen",
+        "field_launch": "Startpunkt (Breite, Laenge)",
+        "field_mode": "Missionstyp",
+        "mode_area": "Flaeche abdecken",
+        "mode_point": "Punkte ueberwachen",
+        "mode_destination": "Ziele erreichen",
+        "mode_formation": "Formation (ohne Aufgabe)",
+        "field_points": "Punkte (einer pro Zeile: Breite,Laenge)",
+        "field_area_sw": "Suedwest-Ecke (Breite, Laenge)",
+        "field_area_ne": "Nordost-Ecke (Breite, Laenge)",
+        "field_formation_shape": "Form",
+        "formation_line": "Linie",
+        "formation_v": "V",
+        "formation_grid": "Raster",
+        "field_spacing": "Abstand zwischen Drohnen (m)",
+        "field_leader": "Anfuehrer (optional, z.B. drone-1; leer = Gruppenschwerpunkt)",
+        "field_min_separation": "Sicherheitsmindestabstand (m)",
     },
 }
 

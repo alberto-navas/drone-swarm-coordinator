@@ -66,12 +66,18 @@ Four independent, separately auditable modules, `src/`:
   minimal kinematics (constant cruise speed toward the target point) and
   simple battery drain.
 
-**Web panel** (`src/web/`, optional): pick one of the two demo scenarios
-and see an animated map (a real Leaflet map, with real streets and
+**Web panel** (`src/web/`, optional): define your own mission — drone
+count, launch point, and a task (cover an area / watch points / reach
+destinations) or a formation — or pick one of the two demo scenarios, and
+see an animated map (a real Leaflet map, with real streets and
 coastlines) with every drone's trail and its separation conflicts marked
 at the exact tick they were detected, alongside the final fleet-status
-table and a conflicts table grouped by drone pair. A thin layer over the
-same `src/simulation.py` the CLI uses — no engine logic is reimplemented.
+table and a conflicts table grouped by drone pair. A custom mission uses
+a task OR a formation, never both at once — combining them would leave
+the task with no visible effect (the formation recomputes every drone's
+target every tick), so the form forces a single mode instead of offering
+a silently-broken combination. A thin layer over the same
+`src/simulation.py` the CLI uses — no engine logic is reimplemented.
 
 **Spanish / English / German**: the CLI (`--lang`) and the web panel
 (language switcher on the page) show the whole interface — drone
@@ -136,12 +142,15 @@ python -m src.web
 # -> http://127.0.0.1:8000
 ```
 
-Pick a scenario and a duration (in ticks) and press "Run" to see the
-animated map, the fleet's final status, and the separation conflicts
-detected. The ES/EN/DE switcher in the top right changes the whole
-page's language — the URL (`?lang=en`) is self-contained, no cookies or
-session state, and switching language on a report re-runs the same
-scenario with the same duration.
+Under "Build your own mission", set the number of drones, the launch
+point, and the mission type (area to cover, points to watch, destinations,
+or formation) with its parameters; or, further down, pick one of the two
+demo scenarios and a duration in ticks. Press "Run" to see the animated
+map, the fleet's final status, and the separation conflicts detected. The
+ES/EN/DE switcher in the top right changes the whole page's language —
+the URL (`?lang=en`) is self-contained, no cookies or session state, and
+switching language on a report re-runs the same mission or scenario with
+the same parameters.
 
 ## Demo scenarios
 
@@ -169,7 +178,7 @@ believable surveillance/area-coverage target for this kind of fleet:
 pytest -v
 ```
 
-79 tests covering the engine's nine modules and the web panel (model,
+93 tests covering the engine's nine modules and the web panel (model,
 geometry, allocation, formation, conflicts, simulation, scenarios, i18n,
 CLI, animated map, web panel), 99% coverage (`pytest --cov=src`, with an
 85% CI threshold as a safety net against a major drop, not a line-by-line

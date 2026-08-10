@@ -55,9 +55,9 @@
   <div class="top-bar">
     <p class="eyebrow">Drone Swarm Coordinator</p>
     <div class="lang-switch" role="group" aria-label="Idioma / Language / Sprache">
-      <a href="/run?scenario={{ scenario_id }}&ticks={{ n_ticks }}&lang=es" aria-current="{{ 'true' if lang == 'es' else 'false' }}">ES</a>
-      <a href="/run?scenario={{ scenario_id }}&ticks={{ n_ticks }}&lang=en" aria-current="{{ 'true' if lang == 'en' else 'false' }}">EN</a>
-      <a href="/run?scenario={{ scenario_id }}&ticks={{ n_ticks }}&lang=de" aria-current="{{ 'true' if lang == 'de' else 'false' }}">DE</a>
+      <a href="{{ base_query }}&lang=es" aria-current="{{ 'true' if lang == 'es' else 'false' }}">ES</a>
+      <a href="{{ base_query }}&lang=en" aria-current="{{ 'true' if lang == 'en' else 'false' }}">EN</a>
+      <a href="{{ base_query }}&lang=de" aria-current="{{ 'true' if lang == 'de' else 'false' }}">DE</a>
     </div>
   </div>
   <h1>{{ scenario_label }}</h1>

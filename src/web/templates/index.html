@@ -15,12 +15,13 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; padding: 3rem 1.25rem; background: var(--bg); color: var(--ink); font-family: var(--font-sans); display: flex; justify-content: center; }
-  main { max-width: 640px; width: 100%; }
+  main { max-width: 700px; width: 100%; }
 
   .top-bar { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
   .eyebrow { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 700; margin: 0 0 0.5rem 0; }
   h1 { margin: 0 0 0.4rem 0; font-size: 1.55rem; font-weight: 700; letter-spacing: -0.01em; }
   .subtitle { color: var(--muted); margin: 0 0 1.75rem 0; font-size: 0.95rem; line-height: 1.5; }
+  h3 { margin: 2rem 0 0.75rem 0; font-size: 1rem; }
 
   .lang-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 999px; overflow: hidden; flex-shrink: 0; }
   .lang-switch a { background: var(--surface); color: var(--muted); padding: 0.35rem 0.6rem; font-family: var(--font-mono); font-size: 0.72rem; font-weight: 700; text-decoration: none; letter-spacing: 0.02em; }
@@ -29,9 +30,18 @@
 
   section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1.25rem; }
   h2 { margin: 0 0 0.6rem 0; font-size: 1.05rem; }
+  p.hint { color: var(--muted); font-size: 0.85rem; margin: 0.2rem 0 1.1rem 0; line-height: 1.45; }
 
   label { display: block; font-size: 0.82rem; color: var(--muted); margin-bottom: 0.35rem; }
-  input[type="number"] { width: 8rem; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-alt); color: var(--ink); margin-bottom: 0.9rem; font-family: var(--font-sans); font-size: 0.9rem; }
+  input[type="number"], input[type="text"], select, textarea {
+    width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 6px;
+    background: var(--surface-alt); color: var(--ink); margin-bottom: 0.9rem;
+    font-family: var(--font-sans); font-size: 0.9rem;
+  }
+  textarea { font-family: var(--font-mono); font-size: 0.85rem; resize: vertical; min-height: 4.5rem; }
+  .field-row { display: flex; gap: 1rem; }
+  .field-row > div { flex: 1; }
+  #ticks-demo-cobertura, #ticks-demo-formacion { width: 8rem; }
 
   button { background: var(--accent); color: var(--surface); border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-family: var(--font-sans); font-size: 0.95rem; font-weight: 700; cursor: pointer; }
   button:hover { filter: brightness(1.1); }
@@ -52,14 +62,111 @@
   <h1>{{ labels.index_h1 }}</h1>
   <p class="subtitle">{{ labels.index_subtitle }}</p>
 
+  <h3>{{ labels.custom_mission_heading }}</h3>
+  <section>
+    <p class="hint">{{ labels.custom_mission_hint }}</p>
+    <form action="/plan" method="get">
+      <input type="hidden" name="lang" value="{{ lang }}">
+
+      <div class="field-row">
+        <div>
+          <label for="drones">{{ labels.field_drones }}</label>
+          <input type="number" id="drones" name="drones" value="6" min="1" max="30">
+        </div>
+        <div>
+          <label for="mode">{{ labels.field_mode }}</label>
+          <select id="mode" name="mode" onchange="updateMissionFields()">
+            <option value="area">{{ labels.mode_area }}</option>
+            <option value="point">{{ labels.mode_point }}</option>
+            <option value="destination">{{ labels.mode_destination }}</option>
+            <option value="formation">{{ labels.mode_formation }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label for="launch_lat">{{ labels.field_launch }}</label>
+          <input type="text" id="launch_lat" name="launch_lat" value="36.140">
+        </div>
+        <div>
+          <label for="launch_lon">&nbsp;</label>
+          <input type="text" id="launch_lon" name="launch_lon" value="-5.350">
+        </div>
+      </div>
+
+      <div id="fields-area">
+        <div class="field-row">
+          <div>
+            <label for="area_sw_lat">{{ labels.field_area_sw }}</label>
+            <input type="text" id="area_sw_lat" name="area_sw_lat" value="36.100">
+          </div>
+          <div>
+            <label for="area_sw_lon">&nbsp;</label>
+            <input type="text" id="area_sw_lon" name="area_sw_lon" value="-5.420">
+          </div>
+        </div>
+        <div class="field-row">
+          <div>
+            <label for="area_ne_lat">{{ labels.field_area_ne }}</label>
+            <input type="text" id="area_ne_lat" name="area_ne_lat" value="36.180">
+          </div>
+          <div>
+            <label for="area_ne_lon">&nbsp;</label>
+            <input type="text" id="area_ne_lon" name="area_ne_lon" value="-5.300">
+          </div>
+        </div>
+      </div>
+
+      <div id="fields-points">
+        <label for="points">{{ labels.field_points }}</label>
+        <textarea id="points" name="points">36.150,-5.360
+36.130,-5.340
+36.160,-5.390</textarea>
+      </div>
+
+      <div id="fields-formation">
+        <div class="field-row">
+          <div>
+            <label for="formation_shape">{{ labels.field_formation_shape }}</label>
+            <select id="formation_shape" name="formation_shape">
+              <option value="line">{{ labels.formation_line }}</option>
+              <option value="v">{{ labels.formation_v }}</option>
+              <option value="grid">{{ labels.formation_grid }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="spacing_m">{{ labels.field_spacing }}</label>
+            <input type="number" id="spacing_m" name="spacing_m" value="25" min="5" max="200">
+          </div>
+        </div>
+        <label for="leader">{{ labels.field_leader }}</label>
+        <input type="text" id="leader" name="leader" value="" placeholder="drone-1">
+      </div>
+
+      <div class="field-row">
+        <div>
+          <label for="ticks">{{ labels.ticks_label }}</label>
+          <input type="number" id="ticks" name="ticks" value="45" min="5" max="600">
+        </div>
+        <div>
+          <label for="min_separation">{{ labels.field_min_separation }}</label>
+          <input type="number" id="min_separation" name="min_separation" value="15" min="1" max="500">
+        </div>
+      </div>
+
+      <div><button type="submit">{{ labels.run_button }}</button></div>
+    </form>
+  </section>
+
   {% for scenario in scenarios %}
   <section>
     <h2>{{ scenario.label }}</h2>
     <form action="/run" method="get">
       <input type="hidden" name="scenario" value="{{ scenario.id }}">
       <input type="hidden" name="lang" value="{{ lang }}">
-      <label for="ticks-{{ scenario.id }}">{{ labels.ticks_label }}</label>
-      <input type="number" id="ticks-{{ scenario.id }}" name="ticks" value="{{ scenario.default_ticks }}" min="5" max="600">
+      <label for="ticks-demo-{{ scenario.id }}">{{ labels.ticks_label }}</label>
+      <input type="number" id="ticks-demo-{{ scenario.id }}" name="ticks" value="{{ scenario.default_ticks }}" min="5" max="600">
       <div><button type="submit">{{ labels.run_button }}</button></div>
     </form>
   </section>
@@ -67,5 +174,14 @@
 
   <p class="limits">{{ labels.limits_text }}</p>
 </main>
+<script>
+  function updateMissionFields() {
+    var mode = document.getElementById('mode').value;
+    document.getElementById('fields-area').style.display = (mode === 'area') ? 'block' : 'none';
+    document.getElementById('fields-points').style.display = (mode === 'point' || mode === 'destination') ? 'block' : 'none';
+    document.getElementById('fields-formation').style.display = (mode === 'formation') ? 'block' : 'none';
+  }
+  updateMissionFields();
+</script>
 </body>
 </html>

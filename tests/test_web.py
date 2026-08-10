@@ -122,7 +122,116 @@ def test_run_translates_status_badges() -> None:
 
 def test_run_lang_switch_preserves_scenario_and_ticks() -> None:
     response = client.get("/run", params={"scenario": "cobertura", "ticks": 15, "lang": "es"})
-    assert "/run?scenario=cobertura&ticks=15&lang=en" in response.text
+    # "&" sale escapado como "&amp;" en el HTML (correcto dentro de un atributo href).
+    assert "/run?scenario=cobertura&amp;ticks=15&lang=en" in response.text
+
+
+def test_index_shows_custom_mission_form() -> None:
+    response = client.get("/")
+    assert 'action="/plan"' in response.text
+    assert 'name="mode"' in response.text
+
+
+def test_plan_area_mission_renders_report() -> None:
+    response = client.get(
+        "/plan",
+        params={
+            "drones": 4,
+            "launch_lat": 36.14,
+            "launch_lon": -5.35,
+            "mode": "area",
+            "area_sw_lat": 36.10,
+            "area_sw_lon": -5.42,
+            "area_ne_lat": 36.18,
+            "area_ne_lon": -5.30,
+            "ticks": 5,
+        },
+    )
+    assert response.status_code == 200
+    assert "<iframe" in response.text
+    assert "drone-1" in response.text
+    assert "drone-4" in response.text
+
+
+def test_plan_point_mission_uses_given_points() -> None:
+    response = client.get(
+        "/plan",
+        params={"drones": 2, "mode": "point", "points": "36.15,-5.36\n36.13,-5.34", "ticks": 5},
+    )
+    assert response.status_code == 200
+    assert "<iframe" in response.text
+
+
+def test_plan_destination_mission_works() -> None:
+    response = client.get(
+        "/plan",
+        params={"drones": 1, "mode": "destination", "points": "36.15,-5.36", "ticks": 5},
+    )
+    assert response.status_code == 200
+
+
+def test_plan_formation_mission_ignores_points() -> None:
+    response = client.get(
+        "/plan",
+        params={"drones": 5, "mode": "formation", "formation_shape": "v", "spacing_m": 20, "ticks": 10},
+    )
+    assert response.status_code == 200
+    assert "<iframe" in response.text
+
+
+def test_plan_formation_with_valid_leader() -> None:
+    response = client.get(
+        "/plan",
+        params={"drones": 3, "mode": "formation", "formation_shape": "grid", "leader": "drone-2", "ticks": 5},
+    )
+    assert response.status_code == 200
+
+
+def test_plan_formation_with_invalid_leader_returns_400() -> None:
+    response = client.get(
+        "/plan",
+        params={"drones": 3, "mode": "formation", "leader": "drone-99", "ticks": 5},
+    )
+    assert response.status_code == 400
+
+
+def test_plan_unknown_mode_returns_400() -> None:
+    response = client.get("/plan", params={"mode": "no-existe"})
+    assert response.status_code == 400
+
+
+def test_plan_unknown_formation_shape_returns_400() -> None:
+    response = client.get("/plan", params={"mode": "formation", "formation_shape": "no-existe"})
+    assert response.status_code == 400
+
+
+def test_plan_point_mission_without_points_returns_400() -> None:
+    response = client.get("/plan", params={"mode": "point", "points": ""})
+    assert response.status_code == 400
+
+
+def test_plan_point_mission_with_malformed_line_returns_400() -> None:
+    response = client.get("/plan", params={"mode": "point", "points": "esto no es un punto"})
+    assert response.status_code == 400
+    assert "Linea 1" in response.json()["detail"]
+
+
+def test_plan_clamps_drone_count_and_ticks() -> None:
+    response = client.get("/plan", params={"drones": 999, "ticks": 999_999, "mode": "area"})
+    assert response.status_code == 200
+    assert "drone-30" in response.text  # se recorta al maximo de 30 drones
+    assert "drone-31" not in response.text
+
+
+def test_plan_report_label_is_custom_mission() -> None:
+    response = client.get("/plan", params={"mode": "area", "ticks": 5, "lang": "en"})
+    assert "Custom mission" in response.text
+
+
+def test_plan_lang_switch_preserves_query() -> None:
+    response = client.get("/plan", params={"mode": "formation", "drones": 3, "ticks": 5, "lang": "es"})
+    assert "mode=formation" in response.text
+    assert "&lang=en" in response.text
 
 
 def test_main_module_is_importable() -> None:
